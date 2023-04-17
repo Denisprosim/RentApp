@@ -1,0 +1,60 @@
+﻿@page "/Tenants"
+
+<PageTitle>Nájemníci</PageTitle>
+
+@using DataLibrary
+@using RentApp.Model;
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+
+<h1>Nájemníci</h1>
+
+<p>Seznam nájemníků.</p>
+
+@if (ts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Jméno</th>
+                <th>Příjmení</th>
+                <th>Telefonní číslo</th>
+                <th>Číslo bytu</th>
+                <th>Začátek smlouvy</th>
+                <th>Konec smlouvy</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in ts)
+            {
+                <tr>
+                    <td>@t.tenant_name</td>
+                    <td>@t.tenant_surname</td>
+                    <td>@t.tenant_tel_number</td>
+                    <td><button @onclick="() => RedirectToSecondPage(t.flats_id)">@t.flats_id</button></td>
+                    <td>@t.tenant_ar_date</td>
+                    <td>@t.tenant_ex_date</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<TenantModel> ts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql1 = "select * from tenants";
+        ts = await _data.LoadData<TenantModel, dynamic>(sql1, new { }, _config.GetConnectionString("DefaultConnection"));
+    }
+
+    private void RedirectToSecondPage(int Id) => NavigationManager.NavigateTo("/flatdetail?value=" + Id);
+
+}

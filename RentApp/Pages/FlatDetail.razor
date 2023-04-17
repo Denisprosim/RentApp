@@ -1,0 +1,66 @@
+﻿@page "/flatdetail"
+
+<PageTitle>Byt @flat_id</PageTitle>
+
+@using DataLibrary
+@using Microsoft.AspNetCore.WebUtilities;
+@using RentApp.Model;
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+
+<h1>Detail bytu</h1>
+
+<p>Informace o bytu.</p>
+
+@if (fs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Číslo bytu</th>
+                <th>ID nájmu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in fs)
+            {
+                <tr>
+                    <td>@f.flat_number</td>
+                    <td>@f.id_rent</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<FlatModel> fs;
+    private string flat_id;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);    
+        if (!query.ContainsKey("value"))
+        {
+            NavigationManager.NavigateTo("/Error");
+        } else
+        {
+            flat_id = query["value"];
+        }
+        
+
+        string sql1 = "select * from flats where id_flats = @id_flat";
+
+        fs = await _data.LoadData<FlatModel, dynamic>(sql1, new {id_flat = @flat_id }, _config.GetConnectionString("DefaultConnection"));
+
+        
+
+    }
+}
